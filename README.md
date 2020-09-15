@@ -24,3 +24,5 @@ Download the `.xpi` file from the [latest release](https://github.com/jacopo-j/W
 Just browse to the meeting recording page and launch the extension.
 
 In order to convert the video stream into an mp4 file, select "Full ffmpeg command" and copy-paste the output into your terminal. Of course you'll need to have [ffmpeg](https://ffmpeg.org) installed.
+
+> :warning: **Friendly reminder**: always mind what you paste into your terminal. While some basic escaping was put in place, you should double check that everything looks fine before running.
