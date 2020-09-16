@@ -11,6 +11,11 @@
     "default_title": "WebXDownloader",
     "default_popup": "popup.html"
   },
+  "content_scripts": [{
+    "js": ["content.js"],
+    "matches": ["*://*.webex.com/*"],
+    "run_at": "document_end"
+  }],
   "homepage_url": "https://github.com/jacopo-j/WebXDownloader",
   "permissions": [
     "tabs",
