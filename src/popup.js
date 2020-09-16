@@ -1,4 +1,4 @@
-const REGEX = /^https?:\/\/(.+?)\.webex\.com\/recordingservice\/sites\/(.+?)\/recording\/play\/([a-f0-9]{32})/g;
+const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/(.+?)\/recording\/(?:play|playback)\/([a-f0-9]{32})/g;
 
 function copyLink() {
     let text = document.getElementById("content");
@@ -12,13 +12,13 @@ function copyLink() {
 function sanitizeShellArg(arg) {
     /*
      * IMPORTANT! This is NOT a safe way to sanitize shell arguments and
-     * should never be used for directly running commands in a shell. 
-     * 
+     * should never be used for directly running commands in a shell.
+     *
      * In this case we are just providing users with a command that they
      * should copy and manually run in their terminal. Thus, we are only
      * trying to prevent commands from accidentally breaking in case
      * they contain any special character.
-     * 
+     *
      * Users should always double check what they paste into their
      * terminal.
      */
