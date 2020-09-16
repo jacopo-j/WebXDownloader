@@ -1,6 +1,6 @@
 # WebXDownloader
 
-This is a browser extension that helps downloading Webex meeting recordings. It provides the direct URL to the HSL stream and the `ffmpeg` command needed in order to download the stream and convert it into an mp4 video file.
+This is a browser extension that helps downloading Webex meeting recordings. It adds a button to the video playback controls that enables downloading of the recording in mp4 format. It also provides the direct URL to the HSL stream and allows the chat transcript to be saved in JSON or plain text format.
 
 ![demo](demo.gif)
 
@@ -21,8 +21,4 @@ Download the `.xpi` file from the [latest release](https://github.com/jacopo-j/W
 
 ## Usage
 
-Just browse to the meeting recording page and launch the extension.
-
-In order to convert the video stream into an mp4 file, select "Full ffmpeg command" and copy-paste the output into your terminal. Of course you'll need to have [ffmpeg](https://ffmpeg.org) installed.
-
-> :warning: **Friendly reminder**: always mind what you paste into your terminal. While some basic escaping was put in place, you should double check that everything looks fine before running.
+Just browse to the meeting recording page and you will find a download button on the right side of the playback control bar. If you want to copy the HLS stream URL or download the chat transcript, launch the extension from your browser.

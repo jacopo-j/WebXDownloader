@@ -4,7 +4,7 @@
   },
   "name": "WebXDownloader",
   "manifest_version": 2,
-  "version": "1.0.1",
+  "version": "1.1",
   "description": "Extracts the HLS stream of Webex meeting recordings",
   "browser_action": {
     "default_icon": "icon.png",
