@@ -40,6 +40,10 @@
             .fail {
                 background-color: rgb(248, 201, 201);
             }
+
+            #chat {
+                margin-top: 0.5em;
+            }
         </style>
     </head>
     <body>
@@ -61,16 +65,10 @@
         <div id="success" style="display: none;">
             <div class="title">Success!</div>
             <br>
-            <div class="subtitle">Output format:</div>
-            <input checked name="format" type="radio" id="hls-opt"></input>
-            <label for="hls-opt">Plain HLS stream URL</label>
-            <br>
-            <input name="format" type="radio" id="ffmpeg-opt"></input>
-            <label for="ffmpeg-opt">Full <code>ffmpeg</code> command</label>
-            <br><br>
+            <div class="subtitle">HLS stream URL:</div>
             <textarea id="content" disabled></textarea>
             <input id="copy" type="button" value="Copy to clipboard" />
-            <br><br><br>
+            <br><br>
             <div id="chat" style="display: none;">
                 <div class="subtitle">Chat transcript:</div>
                 <input checked name="chat" type="radio" id="chat-opt"></input>

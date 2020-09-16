@@ -9,33 +9,6 @@ function copyLink() {
     text.disabled = true;
 }
 
-function sanitizeShellArg(arg) {
-    /*
-     * IMPORTANT! This is NOT a safe way to sanitize shell arguments and
-     * should never be used for directly running commands in a shell.
-     *
-     * In this case we are just providing users with a command that they
-     * should copy and manually run in their terminal. Thus, we are only
-     * trying to prevent commands from accidentally breaking in case
-     * they contain any special character.
-     *
-     * Users should always double check what they paste into their
-     * terminal.
-     */
-    let sanitized = arg.replace(/([$`\\!"])/g, '\\$1');
-    return `"${sanitized}"`;
-}
-
-function updateContent() {
-    let content = document.getElementById("content");
-    if (document.getElementById("hls-opt").checked) {
-        content.innerText = content.dataset.content;
-    } else if (document.getElementById("ffmpeg-opt").checked) {
-        let title = document.getElementById("content").dataset.title + ".mp4";
-        content.innerText = `ffmpeg -i '${content.dataset.content}' -c copy ${sanitizeShellArg(title)}`;
-    }
-}
-
 function downloadChat() {
     let download = document.getElementById("download");
     let link = document.createElement("a");
@@ -64,8 +37,6 @@ function renderSuccess(title, url, chat) {
     document.getElementById("content").dataset.content = url;
     document.getElementById("content").dataset.title = title;
     document.getElementById("copy").onclick = copyLink;
-    document.getElementById("hls-opt").onclick = updateContent;
-    document.getElementById("ffmpeg-opt").onclick = updateContent;
     if (chat.length > 0) {
         document.getElementById("chat").style.display = "block";
         document.getElementById("download").dataset.content = JSON.stringify(chat);

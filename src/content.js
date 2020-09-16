@@ -42,15 +42,14 @@ var observer = new MutationObserver(function(mutations) {
                         i.addEventListener("click", function() {
                             window.location = mp4Url;
                         })
-                                        })
-                        .catch(exception => {
-                            console.log("Error")
-                        });
-        })
-                .catch(exception => {
-                    console.log("Error")
-                });
-
+                    })
+                    .catch(exception => {
+                        console.log("Error")
+                    });
+            })
+            .catch(exception => {
+                console.log("Error")
+            });
     }
 });
 
