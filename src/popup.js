@@ -73,7 +73,7 @@ function callback(tabs) {
     let subdomain = match[1];
     let sitename = match[2];
     let recording_id = match[3];
-    fetch(`https://${subdomain}.webex.com/webappng/api/v1/recordings/${recording_id}/stream?siteurl=${sitename}`)
+    fetch(`https://${subdomain}.webex.com/webappng/api/v1/recordings/${recording_id}/stream?siteurl=${sitename}`, {headers: {"appFrom": "pb"}})
         .then(response => response.json())
         .then(data => {
             let host = data["mp4StreamOption"]["host"];
