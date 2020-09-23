@@ -45,6 +45,10 @@
             #chat {
                 margin-top: 0.5em;
             }
+
+            li {
+                margin-bottom: .5em;
+            }
         </style>
     </head>
     <body>
@@ -56,7 +60,11 @@
         <div id="fail" style="display: none;">
             <div class="title">That didn't work</div>
             <br>
-            Some error occurred while processing the page. Maybe refresh and try again?
+            Some error occurred while processing the page. Here's what you can try:
+            <ul>
+                <li>Refresh and try again; sometimes it just works</li>
+                <li>If you are using incognito mode, try with a normal browser window instead</li>
+            </ul>
         </div>
         <div id="loading">
             <div class="title">Loading</div>
