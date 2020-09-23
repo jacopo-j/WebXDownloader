@@ -23,33 +23,28 @@ var observer = new MutationObserver(function(mutations) {
         let subdomain = match[1];
         let sitename = match[2];
         let recording_id = match[3];;
-        fetch(`https://${subdomain}.webex.com/webappng/api/v1/recordings/${recording_id}/stream?siteurl=${sitename}`)
-            .then(response => response.json())
-            .then(data => {
+        chrome.runtime.sendMessage(
+            {fetchJson: `https://${subdomain}.webex.com/webappng/api/v1/recordings/${recording_id}/stream?siteurl=${sitename}`},
+            function(data) {
                 let host = data["mp4StreamOption"]["host"];
                 let recording_dir = data["mp4StreamOption"]["recordingDir"];
                 let timestamp = data["mp4StreamOption"]["timestamp"];
                 let token = data["mp4StreamOption"]["token"];
                 let xml_name = data["mp4StreamOption"]["xmlName"];
                 let playback_option = data["mp4StreamOption"]["playbackOption"];
-                let meeting_name = data["recordName"];
-                fetch(`${host}/apis/html5-pipeline.do?recordingDir=${recording_dir}&timestamp=${timestamp}&token=${token}&xmlName=${xml_name}&isMobileOrTablet=false&ext=${playback_option}`)
-                    .then(response => response.text())
-                    .then(text => (new window.DOMParser()).parseFromString(text, "text/xml"))
-                    .then(data => {
+                chrome.runtime.sendMessage(
+                    {fetchText: `${host}/apis/html5-pipeline.do?recordingDir=${recording_dir}&timestamp=${timestamp}&token=${token}&xmlName=${xml_name}&isMobileOrTablet=false&ext=${playback_option}`},
+                    function(text) {
+                        let data = (new window.DOMParser()).parseFromString(text, "text/xml");
                         let filename = data.getElementsByTagName("Sequence")[0].textContent;
                         let mp4Url = `${host}/apis/download.do?recordingDir=${recording_dir}&timestamp=${timestamp}&token=${token}&fileName=${filename}`;
                         i.addEventListener("click", function() {
                             window.location = mp4Url;
                         })
-                    })
-                    .catch(exception => {
-                        console.log("Error")
-                    });
-            })
-            .catch(exception => {
-                console.log("Error")
-            });
+                    }
+                )
+            }
+        )
     }
 });
 
