@@ -4,7 +4,7 @@
         <style>
             body {
                 width: 20em;
-                max-height: 25em;
+                max-height: 35em;
                 font-size: 100%;
                 margin: 1em;
                 background-color: #fcfcfc;
@@ -49,6 +49,21 @@
             li {
                 margin-bottom: .5em;
             }
+
+            .image {
+                width: 60%;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            #protip {
+                font-size: 90%;
+            }
+
+            hr {
+                opacity: 20%;
+            }
         </style>
     </head>
     <body>
@@ -89,6 +104,18 @@
                 <input id="download" type="button" value="Download" />
             </div>
         </div>
+        <div id="protip" style="display: none">
+            <br>
+            <hr>
+            <div><i>Pro tip: to just download the recording, look for the download icon on the bottom right. You didn't need to open this menu.</i></div>
+            <br>
+            <img src="image.png" class="image" />
+            <br>
+            <input type="checkbox" id="hide-protip"></input>
+            <label for="hide-protip">I know, don't show this again</label>
+            <br>
+        </div>
     </body>
 </html>
+<script src="options.js"></script>
 <script src="popup.js"></script>

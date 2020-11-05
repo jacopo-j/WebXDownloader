@@ -91,11 +91,15 @@ function callback(tabs) {
                     let messages = data.getElementsByTagName("Message");
                     let chat = [];
                     for (let i = 0; i < messages.length; i++) {
-                        chat.push({
-                            "timecode": timeCode(messages[i].getElementsByTagName("DateTimeUTC")[0].textContent),
-                            "name": messages[i].getElementsByTagName("LoginName")[0].textContent,
-                            "message": messages[i].getElementsByTagName("Content")[0].textContent
-                        });
+                        try {
+                            chat.push({
+                                "timecode": timeCode(messages[i].getElementsByTagName("DateTimeUTC")[0].textContent),
+                                "name": messages[i].getElementsByTagName("LoginName")[0].textContent,
+                                "message": messages[i].getElementsByTagName("Content")[0].textContent
+                            });
+                        } catch(exception) {
+                            continue;
+                        }
                     }
                     let hlsUrl = `${host}/hls-vod/recordingDir/${recording_dir}/timestamp/${timestamp}/token/${token}/fileName/${filename}.m3u8`;
                     renderSuccess(meeting_name, hlsUrl, chat);
