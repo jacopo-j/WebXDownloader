@@ -1,4 +1,4 @@
-const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/(.+?)\/recording\/(?:play|playback)\/([a-f0-9]{32})/g;
+const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/(.+?)\/.*([a-f0-9]{32})/g;
 
 function copyLink() {
     let text = document.getElementById("content");
@@ -55,6 +55,18 @@ function renderException(exception) {
     document.getElementById("fail").style.display = "block";
 }
 
+function checkUpdates() {
+    fetch("https://api.github.com/repos/jacopo-j/webxdownloader/releases/latest")
+        .then(response => response.json())
+        .then(data => {
+            let latestVersion = data.tag_name;
+            let currentVersion = chrome.runtime.getManifest().version;
+            if (latestVersion && latestVersion != currentVersion) {
+                document.getElementById("updates-available").style.display = "block";
+            }
+        })
+}
+
 function timeCode(absTime) {
     let date = new Date(parseInt(absTime));
     let hour = ("0" + date.getHours()).slice(-2);
@@ -64,6 +76,7 @@ function timeCode(absTime) {
 }
 
 function callback(tabs) {
+    checkUpdates();
     var url = tabs[0].url;
     let match = REGEX.exec(url);
     if (! match || match.length !== 4) {
