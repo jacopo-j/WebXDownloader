@@ -16,6 +16,7 @@ var observer = new MutationObserver(function(mutations) {
         var i = document.createElement("i");
         i.setAttribute("class", "icon-download")
         i.setAttribute("title", "Download");
+        i.setAttribute("id", "downloadButton")
         i.setAttribute("aria-label", "Download")
         i.setAttribute("role", "button")
         div.appendChild(i)
