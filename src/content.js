@@ -1,7 +1,12 @@
-const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/(.+?)\/recording\/(?:play|playback)\/([a-f0-9]{32})/g;
+const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/(.+?)\/.*([a-f0-9]{32})/g;
 
 var observer = new MutationObserver(function(mutations) {
     if (document.getElementsByClassName('buttonRightContainer').length) { // wait for this
+
+        let loadingText = document.getElementsByClassName("el-loading-text")[0];
+        if (loadingText && loadingText.contains("The recording is being decrypted")) {
+            return; // will try again later
+        }
 
         observer.disconnect(); //We can disconnect observer once the element exist if we dont want observe more changes in the DOM
 
@@ -11,7 +16,6 @@ var observer = new MutationObserver(function(mutations) {
         var i = document.createElement("i");
         i.setAttribute("class", "icon-download")
         i.setAttribute("title", "Download");
-        i.setAttribute("id", "downloadButton")
         i.setAttribute("aria-label", "Download")
         i.setAttribute("role", "button")
         div.appendChild(i)

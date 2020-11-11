@@ -4,7 +4,6 @@
         <style>
             body {
                 width: 20em;
-                max-height: 35em;
                 font-size: 100%;
                 margin: 1em;
                 background-color: #fcfcfc;
@@ -50,6 +49,10 @@
                 margin-bottom: .5em;
             }
 
+            a {
+                color: black;
+            }
+
             .image {
                 width: 60%;
                 display: block;
@@ -64,9 +67,22 @@
             hr {
                 opacity: 20%;
             }
+
+            #updates-available {
+                background-color: gold;
+                border-radius: 2px;
+                height: 1.8em;
+                text-align: center;
+                padding-top: 0.5em;
+                margin-bottom: 0.8em;
+                border: 1px solid orange;
+            }
         </style>
     </head>
     <body>
+        <div id="updates-available" style="display: none;">
+            <a href="https://github.com/jacopo-j/WebXDownloader/releases">New version available!</a>
+        </div>
         <div id="errpage" style="display: none;">
             <div class="title">Whoops</div>
             <br>
@@ -77,6 +93,7 @@
             <br>
             Some error occurred while processing the page. Here's what you can try:
             <ul>
+                <li>Make sure you have the <a href="https://github.com/jacopo-j/WebXDownloader/releases">latest version</a></li>
                 <li>Refresh and try again; sometimes it just works</li>
                 <li>If you are using incognito mode, try with a normal browser window instead</li>
             </ul>
