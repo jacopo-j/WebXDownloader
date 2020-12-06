@@ -28,6 +28,9 @@ function downloadChat() {
         link.href = `data:application/octet-stream;charset=utf-8,${encodeURIComponent(download.dataset.content)}`;
     }
     link.click();
+    if (navigator.userAgent.indexOf("Safari") > -1) {
+        chrome.runtime.sendMessage({safariOpenUrl: link.href})
+    }
 }
 
 function renderSuccess(title, url, chat) {
@@ -63,6 +66,13 @@ function checkUpdates() {
             let currentVersion = chrome.runtime.getManifest().version;
             if (latestVersion && latestVersion != currentVersion) {
                 document.getElementById("updates-available").style.display = "block";
+                if (navigator.userAgent.indexOf("Safari") > -1) {
+                    document.getElementById("updates-link").addEventListener("click", (event) => {
+                        chrome.runtime.sendMessage({
+                            safariOpenUrl: document.getElementById("updates-link").getAttribute("href")
+                        });
+                    });
+                }
             }
         })
 }
@@ -79,16 +89,26 @@ function callback(tabs) {
     checkUpdates();
     var url = tabs[0].url;
     let match = REGEX.exec(url);
-    if (! match || match.length !== 4) {
+    if (! match) {
         renderFailure();
         return;
     }
-    let subdomain = match[1];
-    let sitename = match[2];
-    let recording_id = match[3];
-    fetch(`https://${subdomain}.webex.com/webappng/api/v1/recordings/${recording_id}/stream?siteurl=${sitename}`, {headers: {"appFrom": "pb"}})
-        .then(response => response.json())
-        .then(data => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+        apiResponse: true
+    }, (data) => {
+        if (chrome.runtime.lastError) {
+            console.log(chrome.runtime.lastError);
+            renderFailure();
+            return;
+        }
+        if (data == -1) {
+            renderFailure();
+            return;
+        } else if (! data) {
+            renderException(null);
+            return;
+        }
+        try {
             let host = data["mp4StreamOption"]["host"];
             let recording_dir = data["mp4StreamOption"]["recordingDir"];
             let timestamp = data["mp4StreamOption"]["timestamp"];
@@ -120,10 +140,10 @@ function callback(tabs) {
                 .catch(exception => {
                     renderException(exception);
                 });
-        })
-        .catch(exception => {
+        } catch (exception) {
             renderException(exception);
-        });
+        }
+    });
 }
 
 var query = {active: true, currentWindow: true};
