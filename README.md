@@ -19,6 +19,17 @@ Download the `.xpi` file from the [latest release](https://github.com/jacopo-j/W
 * Click "Load unpacked extension..." on the top left
 * Select the folder to which your zip file was extracted.
 
+### Safari (experimental)
+
+1. Download the `.dmg` file from the [latest release](https://github.com/jacopo-j/WebXDownloader/releases)
+2. Mount the disk image by double clicking it
+3. Drag the WebXDownloader app to your Applications folder
+4. Open Safari > Preferences > Advanced and enable "Show Develop menu in menu bar"
+5. From the Develop menu in the menu bar, enable "Allow Unsigned Extensions"
+6. Open Safari > Preferences > Extensions and enable WebXDownloader
+
+You will need to repeat **step 5** each time you restart Safari.
+
 ## Usage
 
 Just browse to the meeting recording page and you will find a download button on the right side of the playback control bar. If you want to copy the HLS stream URL or download the chat transcript, launch the extension from your browser.
