@@ -24,11 +24,8 @@ Download the `.xpi` file from the [latest release](https://github.com/jacopo-j/W
 1. Download the `.dmg` file from the [latest release](https://github.com/jacopo-j/WebXDownloader/releases)
 2. Mount the disk image by double clicking it
 3. Drag the WebXDownloader app to your Applications folder
-4. Open Safari > Preferences > Advanced and enable "Show Develop menu in menu bar"
-5. From the Develop menu in the menu bar, enable "Allow Unsigned Extensions"
-6. Open Safari > Preferences > Extensions and enable WebXDownloader
-
-You will need to repeat **step 5** each time you restart Safari.
+4. Open the app once (right click > open)
+5. Open Safari > Preferences > Extensions and enable WebXDownloader
 
 ## Usage
 
