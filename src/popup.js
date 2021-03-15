@@ -13,23 +13,32 @@ function downloadChat() {
     let download = document.getElementById("download");
     let link = document.createElement("a");
     let title = document.getElementById("content").dataset.title;
+    //reparsing + reparsing date
+    let chatData = JSON.parse(download.dataset.content);
     if (document.getElementById("chat-opt").checked) {
         link.download = `${title}_chat.txt`;
-        let chatData = JSON.parse(download.dataset.content);
         let out = [];
         for (let i = 0; i < chatData.length; i++) {
             let m = chatData[i];
-            out.push(`${m.timecode} - ${m.name}\n${m.message}`);
+            out.push(`${timeFormatter(m.timecode)} - ${m.name}\n${m.message}`);
         }
         let file = out.join("\n\n") + "\n";
         link.href = `data:application/octet-stream;charset=utf-8,${encodeURIComponent(file)}`;
     } else if (document.getElementById("json-opt").checked) {
         link.download = `${title}_chat.json`;
         link.href = `data:application/octet-stream;charset=utf-8,${encodeURIComponent(download.dataset.content)}`;
+    } else if (document.getElementById("srt-opt").checked) {
+        link.download = `${title}_chat.srt`;
+        let file = "";
+        for (let i = 0; i < chatData.length; i++) {
+            file += constructSub(chatData[i], i+1);
+        }
+        link.href = `data:application/octet-stream;charset=utf-8,${encodeURIComponent(file)}`;
     }
+
     link.click();
     if (navigator.userAgent.indexOf("Safari") > -1) {
-        chrome.runtime.sendMessage({safariOpenUrl: link.href})
+        chrome.runtime.sendMessage({ safariOpenUrl: link.href })
     }
 }
 
@@ -77,19 +86,35 @@ function checkUpdates() {
         })
 }
 
-function timeCode(absTime) {
-    let date = new Date(parseInt(absTime));
-    let hour = ("0" + date.getHours()).slice(-2);
+function timeFormatter(date, asTimespan = false) {
+    var date = new Date(date);
+    var h;
+    if (asTimespan) {
+        h = date.getUTCHours();
+    } else {
+        h = date.getHours();
+    }
+    let hour = ("0" + h).slice(-2);
     let minute = ("0" + date.getMinutes()).slice(-2);
     let second = ("0" + date.getSeconds()).slice(-2);
     return `${hour}:${minute}:${second}`;
+}
+
+function constructSub(message, index) {
+    var duration = 1.5 + 2 * message.message.split(' ').length;
+    var at = message.timecode - this.startTime;
+    text = index + '\n' +
+        timeFormatter(at, true) + ',000 --> ' + timeFormatter(at + duration * 1000, true) + ',000' + '\n' +
+        message.name + ': ' + message.message + '\n' +
+        '\n';
+    return text;
 }
 
 function callback(tabs) {
     checkUpdates();
     var url = tabs[0].url;
     let match = REGEX.exec(url);
-    if (! match) {
+    if (!match) {
         renderFailure();
         return;
     }
@@ -104,7 +129,7 @@ function callback(tabs) {
         if (data == -1) {
             renderFailure();
             return;
-        } else if (! data) {
+        } else if (!data) {
             renderException(null);
             return;
         }
@@ -122,15 +147,16 @@ function callback(tabs) {
                 .then(data => {
                     let filename = data.getElementsByTagName("Sequence")[0].textContent;
                     let messages = data.getElementsByTagName("Message");
+                    this.startTime = parseInt(data.getElementsByTagName("StartTimeUTC")[0].textContent);
                     let chat = [];
                     for (let i = 0; i < messages.length; i++) {
                         try {
                             chat.push({
-                                "timecode": timeCode(messages[i].getElementsByTagName("DateTimeUTC")[0].textContent),
+                                "timecode": parseInt((messages[i].getElementsByTagName("DateTimeUTC")[0].textContent)),
                                 "name": messages[i].getElementsByTagName("LoginName")[0].textContent,
                                 "message": messages[i].getElementsByTagName("Content")[0].textContent
                             });
-                        } catch(exception) {
+                        } catch (exception) {
                             continue;
                         }
                     }
@@ -146,5 +172,5 @@ function callback(tabs) {
     });
 }
 
-var query = {active: true, currentWindow: true};
+var query = { active: true, currentWindow: true };
 chrome.tabs.query(query, callback);
