@@ -1,11 +1,16 @@
-const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/(.+?)\/.*([a-f0-9]{32})/g;
+const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/([^\/]+)\/.*?([a-f0-9]{32})(.*)/g;
 const MATCH = REGEX.exec(location.href);
 const SUBDOMAIN = MATCH[1];
 const SITENAME = MATCH[2];
 const RECORDING_ID = MATCH[3];
-const API_URL = `https://${SUBDOMAIN}.webex.com/webappng/api/v1/recordings/${RECORDING_ID}/stream?siteurl=${SITENAME}`;
+const AUTH_PARAMS = MATCH[4];
+var API_URL = `https://${SUBDOMAIN}.webex.com/webappng/api/v1/recordings/${RECORDING_ID}/stream`;
 var PASSWORD;
 var API_RESPONSE = -1;
+
+if (AUTH_PARAMS) {
+    API_URL += AUTH_PARAMS;
+}
 
 var observer = new MutationObserver(function(mutations) {
     if (document.getElementsByClassName('buttonRightContainer').length) { // wait for this

@@ -1,6 +1,6 @@
 {
   "description": "Enables downloading of Webex meeting recordings",
-  "version": "1.2",
+  "version": "1.2.1",
   "permissions": [
     "storage",
     "tabs",
