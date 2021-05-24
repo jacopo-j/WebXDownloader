@@ -1,4 +1,4 @@
-const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/([^\/]+)\/.*?([a-f0-9]{32})(.*)/g;
+const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/([^\/]+)\/.*?([a-f0-9]{32})[^\?]*(\?.*)?/g;
 const MATCH = REGEX.exec(location.href);
 const SUBDOMAIN = MATCH[1];
 const SITENAME = MATCH[2];
