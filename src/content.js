@@ -35,6 +35,9 @@ function createDownloadButton(downloadURL) {
     return div;
 }
 
+/**
+ * Process a JSON-formatted response obtained from a WebEx page.
+ */
 function parseParametersFromResponse(response) {
     // Alias used to centralize response values
     const streamOption = response["mp4StreamOption"];
