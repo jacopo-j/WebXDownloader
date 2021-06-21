@@ -214,5 +214,6 @@ function callback(tabs) {
     });
 }
 
+// Get the currently focused tab
 const query = { active: true, currentWindow: true };
 chrome.tabs.query(query, callback);
