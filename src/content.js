@@ -13,8 +13,9 @@ if (AUTH_PARAMS) API_URL += AUTH_PARAMS;
 /**
  * Create the download button to add to the Webex video viewer.
  * @param {string} downloadURL URL of the video to download.
+ * @param {string} savepath Path where save the recording.
  */
-function createDownloadButton(downloadURL) {
+function createDownloadButton(downloadURL, savepath) {
     // Create the button "container"
     const div = document.createElement("div");
     div.setAttribute("class", "buttonItem");
@@ -28,7 +29,11 @@ function createDownloadButton(downloadURL) {
     i.setAttribute("role", "button");
 
     // Add the onClick event
-    i.addEventListener("click", () => window.location = downloadURL);
+    const downloadMessage = {
+        downloadURL: downloadURL,
+        savepath: savepath
+    };
+    i.addEventListener("click", () => chrome.runtime.sendMessage(downloadMessage));
 
     div.appendChild(i);
 
@@ -50,13 +55,17 @@ function parseParametersFromResponse(response) {
     const xmlName = streamOption["xmlName"];
     const playbackOption = streamOption["playbackOption"];
 
+    // Get the name of the recording
+    const recordName = response["recordName"];
+
     return {
         host,
         recordingDir,
         timestamp,
         token,
         xmlName,
-        playbackOption
+        playbackOption,
+        recordName
     }
 }
 
@@ -113,11 +122,14 @@ function mutationCallback(_mutationArray, observer) {
                     const data = parser.parseFromString(text, "text/xml");
                     const filename = data.getElementsByTagName("Sequence")[0].textContent;
 
+                    // Set the recording name as the save name
+                    const savename = `${params.recordName}.mp4`;
+
                     // Compose the download link of the video
                     const downloadURL = composeDownloadURL(params, filename);
                     
                     // Create the download button
-                    const downloadButton = createDownloadButton(downloadURL.toString());
+                    const downloadButton = createDownloadButton(downloadURL.toString(), savename);
 
                     // Disconnect this observer to avoid
                     // triggering the DOM change detection event
