@@ -207,7 +207,7 @@ function callback(tabs) {
                 // Compse the captions URL
                 const filename = data.getElementsByTagName("Sequence")[0].textContent;
                 const meetingName = response["recordName"];
-                const hlsUrl = `${host}/hls-vod/recordingDir/${params.recordingDir}/timestamp/${params.timestamp}/token/${params.token}/fileName/${filename}.m3u8`;
+                const hlsUrl = `${params.host}/hls-vod/recordingDir/${params.recordingDir}/timestamp/${params.timestamp}/token/${params.token}/fileName/${filename}.m3u8`;
                 renderSuccess(meetingName, hlsUrl, chat);
             })
             .catch(ex => renderException(ex));
