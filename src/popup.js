@@ -186,8 +186,10 @@ function callback(tabs) {
             .then(response => response.text())
             .then(text => (new window.DOMParser()).parseFromString(text, "text/xml"))
             .then(data => {
+                // Convert from HTMLCollection to array
+                const messages = [...data.getElementsByTagName("Message")];
+
                 // Parse the messages in the chat
-                const messages = data.getElementsByTagName("Message");
                 const chat = messages.map((message) => {
                     // First get the HTML Elements
                     const datetimeElement = message.getElementsByTagName("DateTimeUTC");
