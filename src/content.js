@@ -102,11 +102,40 @@ function mutationCallback(_mutationArray, observer) {
     const loadingText = document.getElementsByClassName("el-loading-text")[0];
     if (!buttons.length || loadingText) return;
 
+    // Disconnect this observer to avoid
+    // triggering the DOM change detection event
+    observer.disconnect();
+
+    /**
+     * Add the download button to the video viewer bar.
+     * @param {string} text 
+     */
+    const addButton = (text) => {
+        // Extract the filename of the video
+        const parser = new window.DOMParser();
+        const data = parser.parseFromString(text, "text/xml");
+        const filename = data.getElementsByTagName("Sequence")[0].textContent;
+
+        // Set the recording name as the save name
+        const savename = `${params.recordName}.mp4`;
+
+        // Compose the download link of the video
+        const downloadURL = composeDownloadURL(params, filename);
+
+        // Create the download button
+        const downloadButton = createDownloadButton(downloadURL.toString(), savename);
+
+        // Get the buttons on the viewer bar and add the download button
+        const buttons = document.getElementsByClassName('buttonRightContainer');
+        buttons[0].prepend(downloadButton);
+    };
+
     chrome.runtime.sendMessage({
             fetchJson: API_URL,
             password: PASSWORD
         },
         (response) => {
+            // Save the response from the page
             API_RESPONSE = response;
 
             // Get the useful parameters from the received response
@@ -115,31 +144,13 @@ function mutationCallback(_mutationArray, observer) {
             // Compose the URL from which to get the video stream to download
             const streamURL = composeStreamURL(params);
 
-            chrome.runtime.sendMessage({ fetchText: streamURL.toString() },
-                (text) => {
-                    // Extract the filename of the video
-                    const parser = new window.DOMParser();
-                    const data = parser.parseFromString(text, "text/xml");
-                    const filename = data.getElementsByTagName("Sequence")[0].textContent;
-
-                    // Set the recording name as the save name
-                    const savename = `${params.recordName}.mp4`;
-
-                    // Compose the download link of the video
-                    const downloadURL = composeDownloadURL(params, filename);
-                    
-                    // Create the download button
-                    const downloadButton = createDownloadButton(downloadURL.toString(), savename);
-
-                    // Disconnect this observer to avoid
-                    // triggering the DOM change detection event
-                    observer.disconnect();
-                    
-                    // Get the buttons on the viewer bar and add the download button
-                    const buttons = document.getElementsByClassName('buttonRightContainer');
-                    buttons[0].prepend(downloadButton);
-                }
-            )
+            // Add the download button (first check for race condition)
+            const downloadButtonAlreadyPresent = document.getElementById('downloadButton') !== null;
+            if (!downloadButtonAlreadyPresent) {
+                chrome.runtime.sendMessage({
+                    fetchText: streamURL.toString()
+                }, addButton);
+            }
         }
     )
 }
