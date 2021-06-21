@@ -57,6 +57,7 @@ function renderException(exception) {
     document.body.classList.add("fail");
     document.getElementById("loading").style.display = "none";
     document.getElementById("fail").style.display = "block";
+    document.getElementById("error-message").textContent = exception.message;
 }
 
 /**
@@ -149,7 +150,7 @@ function checkResponseForErrors(response) {
         renderFailure();
         validResponse = false;
     } else if (!response) {
-        renderException(null);
+        renderException(new Error("Received null response"));
         validResponse = false;
     }
 
@@ -180,7 +181,7 @@ function callback(tabs) {
 
         // Compose the URL from which to get the video stream to download
         const streamURL = composeStreamURL(params);
-
+        
         fetch(streamURL.toString())
             .then(response => response.text())
             .then(text => (new window.DOMParser()).parseFromString(text, "text/xml"))
