@@ -1,42 +1,54 @@
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
+// Listener used in the background to execute
+// commands passed by parameter from the extension
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         if (request.fetchJson) {
-            let headers = {headers: {"Accept": "application/json, text/plain, */*"}};
-            if (request.password) {
-                headers.headers.accessPwd = request.password;
-            } else {
-                headers.headers.appFrom = "pb";
-            }
+            // Set the header used to fetch the JSON with the
+            // parameters passed by the main "process"
+            const headers = { headers: { "Accept": "application/json, text/plain, */*" } };
+            if (request.password) headers.headers.accessPwd = request.password;
+            else headers.headers.appFrom = "pb";
+
             fetch(request.fetchJson, headers)
                 .then(response => response.json())
                 .then(response => sendResponse(response))
-                .catch(exception => {
-                    sendResponse(null);
-                });
+                .catch(_exception => sendResponse(null));
             return true;
         }
+
         if (request.fetchText) {
             fetch(request.fetchText)
                 .then(response => response.text())
                 .then(response => sendResponse(response));
             return true;
         }
+
         if (request.safariOpenUrl) {
             chrome.tabs.create({url: request.safariOpenUrl});
+        }
+
+        if (request.downloadURL && request.savepath) {
+            chrome.downloads.download({
+                url: request.downloadURL,
+                filename: request.savepath
+            });
         }
     }
 );
 
 function reqWatcher(details) {
-    for (let i = 0; i < details.requestHeaders.length; i++) {
-        if (details.requestHeaders[i].name == "accessPwd") {
-            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    recPassword: details.requestHeaders[i].value
-                });
-            });
-            return;
-        }
+    // Find the detail containing the access password
+    const result = details.requestHeaders.filter((e) => e.name === "accessPwd");
+
+    if (result.length > 0) {
+        // The password exists
+        const password = result[0];
+
+        // Send the password to the the current tab
+        const callback = (tabs) => chrome.tabs.sendMessage(tabs[0].id, { recPassword: password.value });
+        chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        }, callback);
     }
 }
 
