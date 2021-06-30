@@ -91,6 +91,11 @@ function composeDownloadURL(params, filename) {
     return url;
 }
 
+function sanitizeFilename(filename) {
+    const allowedChars = /[^\w\s\d\-_~,;\[\]\(\).]/g;
+    return filename.replaceAll(allowedChars, "_");
+}
+
 /**
  * Callback used by a MutationObserver object in a
  * WebEx page containing a registration to download.
@@ -140,7 +145,7 @@ function addDownloadButtonToViewer(text, params) {
     const filename = data.getElementsByTagName("Sequence")[0].textContent;
 
     // Set the recording name as the save name
-    const savename = `${params.recordName}.mp4`;
+    const savename = `${sanitizeFilename(params.recordName)}.mp4`;
 
     // Compose the download link of the video
     const downloadURL = composeDownloadURL(params, filename);
