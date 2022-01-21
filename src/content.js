@@ -17,6 +17,42 @@ if (AUTH_PARAMS) API_URL += AUTH_PARAMS;
  */
 function createDownloadButton(downloadURL, savepath) {
     // Create the button "container"
+    const btn = document.createElement("button");
+    btn.setAttribute("id", "downloadButton")
+    btn.setAttribute("class", "vjs-download-button vjs-control vjs-button");
+    btn.setAttribute("aria-disabled", "false");
+    btn.setAttribute("type", "button");
+    btn.title = 'Download Recording'
+
+    const span = document.createElement("span");
+    span.setAttribute("class", "vjs-icon-placeholder")
+    span.setAttribute("aria-hidden", "true")
+
+    const span2 = document.createElement("span");
+    span2.setAttribute("class", "vjs-control-text")
+    span2.setAttribute("aria-live", "polite")
+    span2.innerHTML = 'Download Recording'
+
+    // Add the onClick event
+    const downloadMessage = {
+        downloadURL: downloadURL,
+        savepath: savepath
+    };
+    btn.addEventListener("click", () => chrome.runtime.sendMessage(downloadMessage));
+
+    btn.appendChild(span);
+    btn.appendChild(span2);
+
+    return btn;
+}
+
+/**
+ * Create the download button to add to the old Webex video viewer.
+ * @param {string} downloadURL URL of the video to download.
+ * @param {string} savepath Path where save the recording.
+ */
+function createDownloadButtonOld(downloadURL, savepath) {
+    // Create the button "container"
     const div = document.createElement("div");
     div.setAttribute("class", "buttonItem");
 
@@ -47,6 +83,11 @@ function parseParametersFromResponse(response) {
     // Alias used to centralize response values
     const streamOption = response["mp4StreamOption"];
 
+    // get the new endpoint that can be (ab)used to download the video
+    // It's very fast if Multi-threading download is supported (for example with aria2c downloader), but for now does not work on browsers
+    // On Chrome it's possible to enable it going to chrome://flags/#enable-parallel-downloading
+    const fallbackPlaySrc = response['fallbackPlaySrc']
+
     // Get the data we need to get the video stream
     const host = streamOption["host"];
     const recordingDir = streamOption["recordingDir"];
@@ -65,7 +106,8 @@ function parseParametersFromResponse(response) {
         token,
         xmlName,
         playbackOption,
-        recordName
+        recordName,
+        fallbackPlaySrc
     }
 }
 
@@ -88,6 +130,7 @@ function composeDownloadURL(params, filename) {
     url.searchParams.set("token", params.token);
     url.searchParams.set("fileName", filename);
 
+    //return params.fallbackPlaySrc
     return url;
 }
 
@@ -103,9 +146,10 @@ function sanitizeFilename(filename) {
 function mutationCallback(_mutationArray, observer) {
     // Check if the change is the one we want and if the loading text is available.
     // Otherwise it returns (fast fail)
-    const buttons = document.getElementsByClassName('buttonRightContainer'); // Buttons on the viewer bar
+    const buttons = document.getElementsByClassName('vjs-control-bar'); // Buttons on the viewer bar
+    const buttonsOld = document.getElementsByClassName('buttonRightContainer');
     const loadingText = document.getElementsByClassName("el-loading-text")[0];
-    if (!buttons.length || loadingText) return;
+    if (!buttons.length || !buttonsOld.length ||loadingText) return;
 
     chrome.runtime.sendMessage({
             fetchJson: API_URL,
@@ -136,9 +180,13 @@ function mutationCallback(_mutationArray, observer) {
 
 /**
  * Add the download button to the video viewer bar.
- * @param {string} text 
+ * @param {string} text
  */
 function addDownloadButtonToViewer(text, params) {
+
+    const downloadButton_dom = document.getElementById("downloadButton")
+    if(downloadButton_dom) return
+
     // Extract the filename of the video
     const parser = new window.DOMParser();
     const data = parser.parseFromString(text, "text/xml");
@@ -149,13 +197,20 @@ function addDownloadButtonToViewer(text, params) {
 
     // Compose the download link of the video
     const downloadURL = composeDownloadURL(params, filename);
-    
-    // Create the download button
-    const downloadButton = createDownloadButton(downloadURL.toString(), savename);
 
     // Get the buttons on the viewer bar and add the download button
-    const buttons = document.getElementsByClassName('buttonRightContainer');
-    buttons[0].prepend(downloadButton);
+    const spacer = document.getElementsByClassName('vjs-custom-control-spacer vjs-spacer')[0];
+    if(spacer) {
+        const downloadButton = createDownloadButton(downloadURL.toString(), savename);
+        spacer.parentNode.insertBefore(downloadButton, spacer.nextSibling);
+    } else {
+        const buttons = document.getElementsByClassName('buttonRightContainer');
+        if(buttons) {
+            const downloadButton = createDownloadButtonOld(downloadURL.toString(), savename);
+            buttons[0].prepend(downloadButton);
+        }
+    }
+
 };
 
 // Add a listener used to receive the password for the WebEx account
