@@ -149,7 +149,7 @@ function mutationCallback(_mutationArray, observer) {
     const buttons = document.getElementsByClassName('vjs-control-bar'); // Buttons on the viewer bar
     const buttonsOld = document.getElementsByClassName('buttonRightContainer');
     const loadingText = document.getElementsByClassName("el-loading-text")[0];
-    if (!buttons.length || !buttonsOld.length ||loadingText) return;
+    if ((!buttons.length && !buttonsOld.length) || loadingText) return;
 
     chrome.runtime.sendMessage({
             fetchJson: API_URL,
