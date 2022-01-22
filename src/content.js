@@ -11,69 +11,29 @@ var API_RESPONSE = -1;
 if (AUTH_PARAMS) API_URL += AUTH_PARAMS;
 
 /**
- * Create the download button to add to the Webex video viewer.
+ * Create the download button to add to the Webex video page.
  * @param {string} downloadURL URL of the video to download.
  * @param {string} savepath Path where save the recording.
  */
 function createDownloadButton(downloadURL, savepath) {
-    // Create the button "container"
-    const btn = document.createElement("button");
-    btn.setAttribute("id", "downloadButton")
-    btn.setAttribute("class", "vjs-download-button vjs-control vjs-button");
-    btn.setAttribute("aria-disabled", "false");
-    btn.setAttribute("type", "button");
-    btn.title = 'Download Recording'
-
-    const span = document.createElement("span");
-    span.setAttribute("class", "vjs-icon-placeholder")
-    span.setAttribute("aria-hidden", "true")
-
-    const span2 = document.createElement("span");
-    span2.setAttribute("class", "vjs-control-text")
-    span2.setAttribute("aria-live", "polite")
-    span2.innerHTML = 'Download Recording'
-
-    // Add the onClick event
-    const downloadMessage = {
-        downloadURL: downloadURL,
-        savepath: savepath
-    };
-    btn.addEventListener("click", () => chrome.runtime.sendMessage(downloadMessage));
-
-    btn.appendChild(span);
-    btn.appendChild(span2);
-
-    return btn;
-}
-
-/**
- * Create the download button to add to the old Webex video viewer.
- * @param {string} downloadURL URL of the video to download.
- * @param {string} savepath Path where save the recording.
- */
-function createDownloadButtonOld(downloadURL, savepath) {
-    // Create the button "container"
-    const div = document.createElement("div");
-    div.setAttribute("class", "buttonItem");
-
     // Create the button
     const i = document.createElement("i");
-    i.setAttribute("class", "icon-download");
     i.setAttribute("title", "Download");
-    i.setAttribute("id", "downloadButton");
-    i.setAttribute("aria-label", "Download");
+    i.setAttribute("tabindex", "0")
     i.setAttribute("role", "button");
+    i.setAttribute("id", "playerDownload");
+    i.setAttribute("aria-label", `Download recording: ${savepath}`);
+    i.classList.add("icon-download", "recordingDownload");
 
-    // Add the onClick event
+    // Add the onClick and onKeyPress events
     const downloadMessage = {
         downloadURL: downloadURL,
         savepath: savepath
     };
     i.addEventListener("click", () => chrome.runtime.sendMessage(downloadMessage));
+    i.addEventListener("keypress", () => chrome.runtime.sendMessage(downloadMessage));
 
-    div.appendChild(i);
-
-    return div;
+    return i;
 }
 
 /**
@@ -144,12 +104,14 @@ function sanitizeFilename(filename) {
  * WebEx page containing a registration to download.
  */
 function mutationCallback(_mutationArray, observer) {
-    // Check if the change is the one we want and if the loading text is available.
+    // Check if the change is the one we want
     // Otherwise it returns (fast fail)
-    const buttons = document.getElementsByClassName('vjs-control-bar'); // Buttons on the viewer bar
-    const buttonsOld = document.getElementsByClassName('buttonRightContainer');
-    const loadingText = document.getElementsByClassName("el-loading-text")[0];
-    if ((!buttons.length && !buttonsOld.length) || loadingText) return;
+    const playButtons = document.getElementsByClassName("recordingTitle"); // Recording title
+    if (!playButtons.length) return;
+
+    // Disconnect this observer to avoid
+    // triggering the DOM change detection event
+    observer.disconnect();
 
     chrome.runtime.sendMessage({
             fetchJson: API_URL,
@@ -158,10 +120,6 @@ function mutationCallback(_mutationArray, observer) {
         (response) => {
             // Save the response from the page
             API_RESPONSE = response;
-
-            // Disconnect this observer to avoid
-            // triggering the DOM change detection event
-            observer.disconnect();
 
             // Get the useful parameters from the received response
             const params = parseParametersFromResponse(response);
@@ -173,7 +131,7 @@ function mutationCallback(_mutationArray, observer) {
             chrome.runtime.sendMessage({
                     fetchText: streamURL.toString()
                 },
-                (text) => addDownloadButtonToViewer(text, params));
+                (text) => addDownloadButtonToPage(text, params));
         }
     )
 }
@@ -182,10 +140,10 @@ function mutationCallback(_mutationArray, observer) {
  * Add the download button to the video viewer bar.
  * @param {string} text
  */
-function addDownloadButtonToViewer(text, params) {
-
-    const downloadButton_dom = document.getElementById("downloadButton")
-    if(downloadButton_dom) return
+function addDownloadButtonToPage(text, params) {
+    // Do not add the button if already present
+    const downloadButtons = document.getElementsByClassName("icon-download")
+    if (downloadButtons.length) return;
 
     // Extract the filename of the video
     const parser = new window.DOMParser();
@@ -199,18 +157,8 @@ function addDownloadButtonToViewer(text, params) {
     const downloadURL = composeDownloadURL(params, filename);
 
     // Get the buttons on the viewer bar and add the download button
-    const spacer = document.getElementsByClassName('vjs-custom-control-spacer vjs-spacer')[0];
-    if(spacer) {
-        const downloadButton = createDownloadButton(downloadURL.toString(), savename);
-        spacer.parentNode.insertBefore(downloadButton, spacer.nextSibling);
-    } else {
-        const buttons = document.getElementsByClassName('buttonRightContainer');
-        if(buttons) {
-            const downloadButton = createDownloadButtonOld(downloadURL.toString(), savename);
-            buttons[0].prepend(downloadButton);
-        }
-    }
-
+    const titleDivs = document.getElementsByClassName('recordingHeader');
+    titleDivs[0].appendChild(downloadButton);
 };
 
 // Add a listener used to receive the password for the WebEx account
