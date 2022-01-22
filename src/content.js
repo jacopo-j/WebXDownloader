@@ -83,17 +83,6 @@ function composeStreamURL(params) {
     return url;
 }
 
-function composeDownloadURL(params, filename) {
-    const url = new URL("apis/download.do", params.host);
-    url.searchParams.set("recordingDir", params.recordingDir);
-    url.searchParams.set("timestamp", params.timestamp);
-    url.searchParams.set("token", params.token);
-    url.searchParams.set("fileName", filename);
-
-    //return params.fallbackPlaySrc
-    return url;
-}
-
 function sanitizeFilename(filename) {
     const allowedChars = /[^\w\s\d\-_~,;\[\]\(\).]/g;
     return filename.replaceAll(allowedChars, "_");
@@ -154,7 +143,7 @@ function addDownloadButtonToPage(text, params) {
     const savename = `${sanitizeFilename(params.recordName)}.mp4`;
 
     // Compose the download link of the video
-    const downloadURL = composeDownloadURL(params, filename);
+    const downloadURL = params.fallbackPlaySrc;
 
     // Create the download button
     const downloadButton = createDownloadButton(downloadURL.toString(), savename);
