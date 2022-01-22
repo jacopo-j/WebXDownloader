@@ -156,6 +156,9 @@ function addDownloadButtonToPage(text, params) {
     // Compose the download link of the video
     const downloadURL = composeDownloadURL(params, filename);
 
+    // Create the download button
+    const downloadButton = createDownloadButton(downloadURL.toString(), savename);
+
     // Get the buttons on the viewer bar and add the download button
     const titleDivs = document.getElementsByClassName('recordingHeader');
     titleDivs[0].appendChild(downloadButton);
