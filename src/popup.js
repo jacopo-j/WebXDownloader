@@ -1,4 +1,4 @@
-const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/([^\/]+)\/.*?([a-f0-9]{32})/g;
+const REGEX = /^https?:\/\/(.+?)\.webex\.com\/(?:recordingservice|webappng)\/sites\/([^\/]+)\/.*?([a-f0-9]{32})[^\?]*(\?.*)?/g
 const UPDATE_URL = "https://api.github.com/repos/jacopo-j/webxdownloader/releases/latest";
 
 function copyLink() {
@@ -169,19 +169,19 @@ function callback(tabs) {
 
     // Check if this URL is of a WebEx page
     if(!isThisAWebExPage(tabs[0].url)) return;
-    
+
     chrome.tabs.sendMessage(tabs[0].id, {
                 apiResponse: true
             }, (response) => {
         // Check if the response is valid
         if(!checkResponseForErrors(response)) return;
-        
+
         // Get the useful parameters from the received response
         const params = parseParametersFromResponse(response);
 
         // Compose the URL from which to get the video stream to download
         const streamURL = composeStreamURL(params);
-        
+
         fetch(streamURL.toString())
             .then(response => response.text())
             .then(text => (new window.DOMParser()).parseFromString(text, "text/xml"))

@@ -43,6 +43,11 @@ function parseParametersFromResponse(response) {
     // Alias used to centralize response values
     const streamOption = response["mp4StreamOption"];
 
+    // get the new endpoint that can be (ab)used to download the video
+    // It's very fast if Multi-threading download is supported (for example with aria2c downloader), but for now does not work on browsers
+    // On Chrome it's possible to enable it going to chrome://flags/#enable-parallel-downloading
+    const fallbackPlaySrc = response['fallbackPlaySrc']
+
     // Get the data we need to get the video stream
     const host = streamOption["host"];
     const recordingDir = streamOption["recordingDir"];
@@ -61,7 +66,8 @@ function parseParametersFromResponse(response) {
         token,
         xmlName,
         playbackOption,
-        recordName
+        recordName,
+        fallbackPlaySrc
     }
 }
 
@@ -84,6 +90,7 @@ function composeDownloadURL(params, filename) {
     url.searchParams.set("token", params.token);
     url.searchParams.set("fileName", filename);
 
+    //return params.fallbackPlaySrc
     return url;
 }
 
@@ -131,7 +138,7 @@ function mutationCallback(_mutationArray, observer) {
 
 /**
  * Add the download button to the video viewer bar.
- * @param {string} text 
+ * @param {string} text
  */
 function addDownloadButtonToPage(text, params) {
     // Do not add the button if already present
@@ -148,9 +155,6 @@ function addDownloadButtonToPage(text, params) {
 
     // Compose the download link of the video
     const downloadURL = composeDownloadURL(params, filename);
-    
-    // Create the download button
-    const downloadButton = createDownloadButton(downloadURL.toString(), savename);
 
     // Get the buttons on the viewer bar and add the download button
     const titleDivs = document.getElementsByClassName('recordingHeader');
