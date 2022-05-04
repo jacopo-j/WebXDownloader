@@ -71,18 +71,6 @@ function parseParametersFromResponse(response) {
     }
 }
 
-function composeStreamURL(params) {
-    const url = new URL("apis/html5-pipeline.do", params.host);
-    url.searchParams.set("recordingDir", params.recordingDir);
-    url.searchParams.set("timestamp", params.timestamp);
-    url.searchParams.set("token", params.token);
-    url.searchParams.set("xmlName", params.xmlName);
-    url.searchParams.set("isMobileOrTablet", "false");
-    url.searchParams.set("ext", params.playbackOption);
-
-    return url;
-}
-
 function sanitizeFilename(filename) {
     const allowedChars = /[^\w\s\d\-_~,;\[\]\(\).]/g;
     return filename.replaceAll(allowedChars, "_");
@@ -113,31 +101,21 @@ function mutationCallback(_mutationArray, observer) {
             // Get the useful parameters from the received response
             const params = parseParametersFromResponse(response);
 
-            // Compose the URL from which to get the video stream to download
-            const streamURL = composeStreamURL(params);
-
             // Add the download button
-            chrome.runtime.sendMessage({
-                    fetchText: streamURL.toString()
-                },
-                (text) => addDownloadButtonToPage(text, params));
+            addDownloadButtonToPage(params);
         }
     )
 }
 
 /**
  * Add the download button to the video viewer bar.
- * @param {string} text
+ * @param {Object} params
  */
-function addDownloadButtonToPage(text, params) {
+function addDownloadButtonToPage(params) {
     // Do not add the button if already present
     const downloadButtons = document.getElementsByClassName("icon-download")
     if (downloadButtons.length) return;
 
-    // Extract the filename of the video
-    const parser = new window.DOMParser();
-    const data = parser.parseFromString(text, "text/xml");
-    const filename = data.getElementsByTagName("Sequence")[0].textContent;
 
     // Set the recording name as the save name
     const savename = `${sanitizeFilename(params.recordName)}.mp4`;
