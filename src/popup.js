@@ -114,6 +114,13 @@ function parseParametersFromResponse(response) {
     const token = streamOption["token"];
     const xmlName = streamOption["xmlName"];
     const playbackOption = streamOption["playbackOption"];
+    const siteid = streamOption["siteid"];
+    const recordid = streamOption["recordid"];
+    const islogin = streamOption["islogin"];
+    const isprevent = streamOption["isprevent"];
+    const ispwd = streamOption["ispwd"];
+
+    const hlsUrl = response["downloadRecordingInfo"]["downloadInfo"]["hlsURL"];
 
     return {
         host,
@@ -121,20 +128,45 @@ function parseParametersFromResponse(response) {
         timestamp,
         token,
         xmlName,
-        playbackOption
+        playbackOption,
+        siteid,
+        recordid,
+        islogin,
+        isprevent,
+        ispwd,
+        hlsUrl
     }
 }
 
 function composeStreamURL(params) {
-    const url = new URL("apis/html5-pipeline.do", params.host);
-    url.searchParams.set("recordingDir", params.recordingDir);
-    url.searchParams.set("timestamp", params.timestamp);
-    url.searchParams.set("token", params.token);
-    url.searchParams.set("xmlName", params.xmlName);
-    url.searchParams.set("isMobileOrTablet", "false");
-    url.searchParams.set("ext", params.playbackOption);
+    // Recordings before May 2022
+    if ("recordingDir" in params) {
+        const url = new URL("apis/html5-pipeline.do", params.host);
+        url.searchParams.set("recordingDir", params.recordingDir);
+        url.searchParams.set("timestamp", params.timestamp);
+        url.searchParams.set("token", params.token);
+        url.searchParams.set("xmlName", params.xmlName);
+        url.searchParams.set("isMobileOrTablet", "false");
+        url.searchParams.set("ext", params.playbackOption);
 
-    return url;
+        return url;
+    }
+    // Recordings from May 2022
+    else if ("siteid" in params) {
+        const url = new URL("nbr/MultiThreadDownloadServlet/recording.xml", params.host);
+        url.searchParams.set("siteid", params.siteid);
+        url.searchParams.set("recordid", params.recordid);
+        url.searchParams.set("ticket", params.token);
+        url.searchParams.set("timestamp", params.timestamp);
+        url.searchParams.set("islogin", params.islogin);
+        url.searchParams.set("isprevent", params.isprevent);
+        url.searchParams.set("ispwd", params.ispwd);
+        url.searchParams.set("play", "1");
+
+        return url;
+    }
+
+    return null;
 }
 
 function checkResponseForErrors(response) {
@@ -182,6 +214,8 @@ function callback(tabs) {
         // Compose the URL from which to get the video stream to download
         const streamURL = composeStreamURL(params);
 
+        if (streamURL === null) renderException({message: "Stream URL is null"});
+
         fetch(streamURL.toString())
             .then(response => response.text())
             .then(text => (new window.DOMParser()).parseFromString(text, "text/xml"))
@@ -204,10 +238,14 @@ function callback(tabs) {
                     };
                 });
 
-                // Compse the captions URL
-                const filename = data.getElementsByTagName("Sequence")[0].textContent;
+                // Compose the hls URL if necessary
+                let hlsUrl = params.hlsUrl;
+                if (hlsUrl === undefined) {
+                    const filename = data.getElementsByTagName("Sequence")[0].textContent;
+                    hlsUrl = `${params.host}/hls-vod/recordingDir/${params.recordingDir}/timestamp/${params.timestamp}/token/${params.token}/fileName/${filename}.m3u8`;
+                }
+
                 const meetingName = response["recordName"];
-                const hlsUrl = `${params.host}/hls-vod/recordingDir/${params.recordingDir}/timestamp/${params.timestamp}/token/${params.token}/fileName/${filename}.m3u8`;
                 renderSuccess(meetingName, hlsUrl, chat);
             })
             .catch(ex => renderException(ex));
