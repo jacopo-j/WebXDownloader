@@ -17,7 +17,7 @@ Download the `.xpi` file from the [latest release](https://github.com/jacopo-j/W
 * Browse to `chrome://extensions`
 * Turn on "Developer mode" on the top right
 * Click "Load unpacked extension..." on the top left
-* Select the folder to which your zip file was extracted.
+* Select the folder named `src` from the folder to which your zip file was extracted.
 
 ### Safari (experimental)
 
