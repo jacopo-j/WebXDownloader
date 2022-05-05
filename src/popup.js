@@ -140,7 +140,7 @@ function parseParametersFromResponse(response) {
 
 function composeStreamURL(params) {
     // Recordings before May 2022
-    if ("recordingDir" in params) {
+    if (params["recordingDir"] !== undefined) {
         const url = new URL("apis/html5-pipeline.do", params.host);
         url.searchParams.set("recordingDir", params.recordingDir);
         url.searchParams.set("timestamp", params.timestamp);
@@ -152,7 +152,7 @@ function composeStreamURL(params) {
         return url;
     }
     // Recordings from May 2022
-    else if ("siteid" in params) {
+    else if (params["siteid"] !== undefined) {
         const url = new URL("nbr/MultiThreadDownloadServlet/recording.xml", params.host);
         url.searchParams.set("siteid", params.siteid);
         url.searchParams.set("recordid", params.recordid);
